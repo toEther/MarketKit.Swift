@@ -8,7 +8,7 @@ public enum BlockchainType {
     case ethereum
     case binanceSmartChain
     case binanceChain
-    case polygon
+    case komerco
     case avalanche
     case optimism
     case arbitrumOne
@@ -29,7 +29,7 @@ public enum BlockchainType {
         case "ethereum": self = .ethereum
         case "binance-smart-chain": self = .binanceSmartChain
         case "binancecoin": self = .binanceChain
-        case "polygon-pos": self = .polygon
+        case "komerco": self = .komerco
         case "avalanche": self = .avalanche
         case "optimistic-ethereum": self = .optimism
         case "arbitrum-one": self = .arbitrumOne
@@ -52,7 +52,7 @@ public enum BlockchainType {
         case .ethereum: return "ethereum"
         case .binanceSmartChain: return "binance-smart-chain"
         case .binanceChain: return "binancecoin"
-        case .polygon: return "polygon-pos"
+        case .komerco: return "komerco"
         case .avalanche: return "avalanche"
         case .optimism: return "optimistic-ethereum"
         case .arbitrumOne: return "arbitrum-one"
