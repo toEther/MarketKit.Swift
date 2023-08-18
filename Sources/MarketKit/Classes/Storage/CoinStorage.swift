@@ -52,34 +52,10 @@ class CoinStorage {
 
         migrator.registerMigration("Rename 'explorerUrl' column to 'eip3091url' in Blockchains") { db in
             try db.alter(table: BlockchainRecord.databaseTableName) { t in
-                t.rename(column: "explorerUrl", to: "eip3091url")
-            }
-        }
-
-        migrator.registerMigration("Rename 'eip3091url' column to 'explorerUrl' in Blockchains") { db in
-            try db.alter(table: BlockchainRecord.databaseTableName) { t in
-                t.rename(column: "eip3091url", to: BlockchainRecord.Columns.explorerUrl.name)
-            }
-        }
-
-        migrator.registerMigration("Transform token types for bitcoin, litecoin and bitcoin cash") { db in
-            for blockchainUid in ["bitcoin", "litecoin"] {
-                if let record = try TokenRecord.filter(TokenRecord.Columns.blockchainUid == blockchainUid && TokenRecord.Columns.type == "native").fetchOne(db) {
-                    try TokenRecord.filter(TokenRecord.Columns.blockchainUid == blockchainUid && TokenRecord.Columns.type == "native").deleteAll(db)
-                    for derivation in ["bip44", "bip49", "bip84", "bip86"] {
-                        let newRecord = TokenRecord(coinUid: record.coinUid, blockchainUid: record.blockchainUid, type: "derived:\(derivation)", decimals: record.decimals)
-                        try newRecord.insert(db)
-                    }
-                }
+                t.rename(column: "explorerUrl", to: BlockchainRecord.Columns.eip3091url.name)
             }
 
-            if let record = try TokenRecord.filter(TokenRecord.Columns.blockchainUid == "bitcoin-cash" && TokenRecord.Columns.type == "native").fetchOne(db) {
-                try TokenRecord.filter(TokenRecord.Columns.blockchainUid == "bitcoin-cash" && TokenRecord.Columns.type == "native").deleteAll(db)
-                for type in ["type0", "type145"] {
-                    let newRecord = TokenRecord(coinUid: record.coinUid, blockchainUid: record.blockchainUid, type: "address_type:\(type)", decimals: record.decimals)
-                    try newRecord.insert(db)
-                }
-            }
+            try BlockchainRecord.updateAll(db, BlockchainRecord.Columns.eip3091url.set(to: nil))
         }
 
         return migrator

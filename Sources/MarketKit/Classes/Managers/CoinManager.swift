@@ -95,11 +95,6 @@ extension CoinManager {
                 .map { $0.token }
     }
 
-    func allBlockchains() throws -> [Blockchain] {
-        try storage.allBlockchainRecords()
-                .map { $0.blockchain }
-    }
-
     func blockchain(uid: String) throws -> Blockchain? {
         try storage.blockchain(uid: uid)
                 .map { $0.blockchain }

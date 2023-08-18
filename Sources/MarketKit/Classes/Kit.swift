@@ -93,10 +93,6 @@ extension Kit {
         try coinManager.tokens(blockchainType: blockchainType, filter: filter, limit: limit)
     }
 
-    public func allBlockchains() throws -> [Blockchain] {
-        try coinManager.allBlockchains()
-    }
-
     public func blockchains(uids: [String]) throws -> [Blockchain] {
         try coinManager.blockchains(uids: uids)
     }
@@ -216,40 +212,20 @@ extension Kit {
         try await hsProvider.coinPriceChartStart(coinUid: coinUid).timestamp
     }
 
-    public func chartPoints(coinUid: String, currencyCode: String, interval: HsPointTimePeriod, pointCount: Int) async throws -> [ChartPoint] {
-        let fromTimestamp = Date().timeIntervalSince1970 - interval.interval * TimeInterval(pointCount)
-
-        let points = try await hsProvider.coinPriceChart(coinUid: coinUid, currencyCode: currencyCode, interval: interval, fromTimestamp: fromTimestamp)
-                .map { $0.chartPoint }
-
-        return points
-    }
-
-    public func chartPoints(coinUid: String, currencyCode: String, periodType: HsPeriodType) async throws -> (TimeInterval, [ChartPoint]) {
+    public func chartPoints(coinUid: String, currencyCode: String, periodType: HsPeriodType) async throws -> [ChartPoint] {
         let interval: HsPointTimePeriod
-
         var fromTimestamp: TimeInterval?
-        var visibleTimestamp: TimeInterval = 0      // start timestamp for visible part of chart. Will change only for .byCustomPoints
 
         switch periodType {
         case .byPeriod(let timePeriod):
+            fromTimestamp = Date().timeIntervalSince1970 - timePeriod.range
             interval = HsChartHelper.pointInterval(timePeriod)
-            visibleTimestamp = Date().timeIntervalSince1970 - timePeriod.range
-            fromTimestamp = visibleTimestamp
-        case .byCustomPoints(let timePeriod, let pointCount):       // custom points needed to build chart indicators
-            interval = HsChartHelper.pointInterval(timePeriod)
-            let customPointInterval = interval.interval * TimeInterval(pointCount)
-            visibleTimestamp = Date().timeIntervalSince1970 - timePeriod.range
-            fromTimestamp =  visibleTimestamp - customPointInterval
         case .byStartTime(let startTime):
             interval = HsChartHelper.intervalForAll(genesisTime: startTime)
-            visibleTimestamp = startTime
         }
 
-        let points = try await hsProvider.coinPriceChart(coinUid: coinUid, currencyCode: currencyCode, interval: interval, fromTimestamp: fromTimestamp)
+        return try await hsProvider.coinPriceChart(coinUid: coinUid, currencyCode: currencyCode, interval: interval, fromTimestamp: fromTimestamp)
                 .map { $0.chartPoint }
-
-        return (visibleTimestamp, points)
     }
 
     // Posts
@@ -284,8 +260,8 @@ extension Kit {
         try await hsProvider.analytics(coinUid: coinUid, currencyCode: currencyCode)
     }
 
-    public func analyticsPreview(coinUid: String) async throws -> AnalyticsPreview {
-        try await hsProvider.analyticsPreview(coinUid: coinUid)
+    public func analyticsPreview(coinUid: String, addresses: [String]) async throws -> AnalyticsPreview {
+        try await hsProvider.analyticsPreview(coinUid: coinUid, addresses: addresses)
     }
 
     public func cexVolumes(coinUid: String, currencyCode: String, timePeriod: HsTimePeriod) async throws -> AggregatedChartPoints {
@@ -328,10 +304,6 @@ extension Kit {
 
     public func holdersRanks() async throws -> [RankValue] {
         try await hsProvider.holdersRanks()
-    }
-
-    public func feeRanks(currencyCode: String) async throws -> [RankMultiValue] {
-        try await hsProvider.feeRanks(currencyCode: currencyCode)
     }
 
     public func revenueRanks(currencyCode: String) async throws -> [RankMultiValue] {
@@ -386,20 +358,12 @@ extension Kit {
 
     // Auth
 
-    public func subscriptions(addresses: [String]) async throws -> [ProSubscription] {
-        try await hsProvider.subscriptions(addresses: addresses)
-    }
-
     public func authKey(address: String) async throws -> String {
         try await hsProvider.authKey(address: address)
     }
 
     public func authenticate(signature: String, address: String) async throws -> String {
         try await hsProvider.authenticate(signature: signature, address: address)
-    }
-
-    public func requestPersonalSupport(telegramUsername: String) async throws {
-        try await hsProvider.requestPersonalSupport(telegramUsername: telegramUsername)
     }
 
     // Misc

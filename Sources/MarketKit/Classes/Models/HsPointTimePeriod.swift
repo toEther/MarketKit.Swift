@@ -1,6 +1,6 @@
 import Foundation
 
-public enum HsPointTimePeriod: String, CaseIterable {
+enum HsPointTimePeriod: String {
     case minute30 = "30m"
     case hour1 = "1h"
     case hour4 = "4h"
